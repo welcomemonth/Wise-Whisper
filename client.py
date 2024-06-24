@@ -124,14 +124,14 @@ class ChatClient(wx.Frame):
         # 初始化实例属性
         self.conversations = []
         self.current_conversation = None
-        self.current_conversation_idx = None
+        self.current_conversation_idx = 0
         self.left_panel = None
         self.left_list = None
-        self.left_button = None
+        self.new_conversation_button = None
         self.right_panel = None
         self.right_text = None
         self.input_text = None
-        self.right_button = None
+        self.send_button = None
 
         self.init_ui()
         self.load()
@@ -261,20 +261,22 @@ class ChatClient(wx.Frame):
                 self.refresh_conversation_list()
                 self.refresh_conversation_detail()
         except OSError:
-            pass
+            print("初始存储文件不存在！")
         except json.JSONDecodeError as e:
             print(repr(e), file=sys.stderr)
+        except TypeError as e:
+            print("初始化！")
 
     def start_thinking_state(self):
         self.right_text.AppendText("\nChatGPT is thinking...")
-        self.right_button.Disable()
+        self.send_button.Disable()
         self.left_list.Disable()
-        self.left_button.Disable()
+        self.new_conversation_button.Disable()
 
     def stop_thinking_state(self):
-        self.right_button.Enable()
+        self.send_button.Enable()
         self.left_list.Enable()
-        self.left_button.Enable()
+        self.new_conversation_button.Enable()
 
     def create_conversation(self, event):
         new_conv = ConversationTree()
