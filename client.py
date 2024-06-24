@@ -179,16 +179,16 @@ class ChatClient(wx.Frame):
 
 
         setting_button = wx.Button(self.left_panel)
-        setting_button.SetBitmap(set_icon("./img/PNG/cog.png"))
+        setting_button.SetBitmap(set_icon("./assets/icon/cog.png"))
         setting_button.SetSize((40, 40))
 
         github_button = wx.Button(self.left_panel)
-        github_button.SetBitmap(set_icon("./img/PNG/github.png"))
+        github_button.SetBitmap(set_icon("./assets/icon/github.png"))
         # 给按钮绑定点击事件
         github_button.Bind(wx.EVT_BUTTON, self.on_github_button_click)
 
         self.new_conversation_button = wx.Button(self.left_panel, label="New")
-        self.new_conversation_button.SetBitmap(set_icon("./img/PNG/plus.png"))
+        self.new_conversation_button.SetBitmap(set_icon("./assets/icon/plus.png"))
         self.new_conversation_button.Bind(wx.EVT_BUTTON, self.create_conversation)
         self.bottom_button_sizer.Add(setting_button, flag=wx.EXPAND | wx.ALL, border=10)
         self.bottom_button_sizer.Add(github_button, flag=wx.EXPAND | wx.ALL, border=10)
