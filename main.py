@@ -15,30 +15,22 @@
 '''
 
 import wx
-from models import ChatMessage, ConversationTree
-
+from typing import Optional
 import random
 import os
 import sys
-
+import json
 import typing
+import appdirs
+import pathlib
 import threading
 import webbrowser
 
-import appdirs
-import pathlib
-import json
+from models import ChatMessage, ConversationTree
+from llm_provider.llm_openai import llm
+
 
 AppDirs = appdirs.AppDirs(appname="Wise-Whisper", appauthor="zzy-yzy")
-
-openai_api_key = os.getenv("OPENAI_API_KEY")
-openai_api_org = os.getenv("OPENAI_API_ORG")
-
-if openai_api_key:
-    import openai
-    openai.api_key = openai_api_key
-    if openai_api_org:
-        openai.organization = openai_api_org
 
 
 def stringify_conversation(conv: ConversationTree) -> str:
@@ -74,17 +66,17 @@ def set_icon(imgpath: str, width: int = 32, height: int = 32):
     icon = setting_icon.Scale(width, height, wx.IMAGE_QUALITY_HIGH)  # 调整图像大小为 32x32
     return icon
 
-def _get_next_completion_thread(conv: ConversationTree, and_then: typing.Callable, truncate_before: int | None):
-    if openai_api_key:
+def _get_next_completion_thread(conv: ConversationTree, and_then: typing.Callable, truncate_before: Optional[int]):
+    if True:
         curr_conv = conv.get_current_conversation_as_dicts()
         if truncate_before != None:
             curr_conv = curr_conv[:truncate_before]
-        test_model = "gpt-3.5-turbo"
-        completion = openai.ChatCompletion.create(
+        test_model = "llama2:13b"
+        completion = llm.chat.completions.create(
             model=test_model,
             messages=curr_conv
         )
-        resp = completion['choices'][0]['message']
+        resp = completion.choices[0].message
     else:
         resp = {'role': 'assistant', 'content': f'As an AI language model, simulated response {random.randint(0, 2**32)}'}
 
@@ -107,7 +99,7 @@ def _get_title_for_conversation_thread(conv: ConversationTree, and_then: typing.
             and_then(resp)
 
 
-def get_next_completion(conv: ConversationTree, and_then: typing.Callable, truncate_before: int | None = None):
+def get_next_completion(conv: ConversationTree, and_then: typing.Callable, truncate_before: Optional[int] = None):
     thread = threading.Thread(target=_get_next_completion_thread, args=(conv, and_then, truncate_before))
     thread.start()
 
@@ -378,7 +370,7 @@ class ChatClient(wx.Frame):
         self.add_to_conversation("user", input_string)
         self.start_thinking_state()
         def post_completion(resp):
-            wx.CallAfter(self.add_to_conversation, resp['role'], resp['content'])
+            wx.CallAfter(self.add_to_conversation, resp.role, resp.content)
             wx.CallAfter(self.stop_thinking_state)
         get_next_completion(self.current_conversation, post_completion)
 
