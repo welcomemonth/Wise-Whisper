@@ -27,8 +27,7 @@ import threading
 import webbrowser
 
 from models import ChatMessage, ConversationTree
-from llm_provider.llm_openai import llm
-
+from llm_provider.llm_openai import ask, test_llm_availability
 
 AppDirs = appdirs.AppDirs(appname="Wise-Whisper", appauthor="zzy-yzy")
 
@@ -51,12 +50,12 @@ def stringify_conversation(conv: ConversationTree) -> str:
         if i == 0:
             ret += f"{i}: <{speaker_str}>\n"
         else:
-            branch_width = conv.get_branch_width(i-1)
-            child_idx = current_conv[i-1].current_child_idx
-            ret += f"{i}: <({child_idx+1}/{branch_width}) {speaker_str}>\n"
+            branch_width = conv.get_branch_width(i - 1)
+            child_idx = current_conv[i - 1].current_child_idx
+            ret += f"{i}: <({child_idx + 1}/{branch_width}) {speaker_str}>\n"
         ret += msg.content
         if i < len(current_conv):
-            ret += f"\n{'-'*50}\n"
+            ret += f"\n{'-' * 50}\n"
     return ret
 
 
@@ -66,36 +65,37 @@ def set_icon(imgpath: str, width: int = 32, height: int = 32):
     icon = setting_icon.Scale(width, height, wx.IMAGE_QUALITY_HIGH)  # 调整图像大小为 32x32
     return icon
 
+
 def _get_next_completion_thread(conv: ConversationTree, and_then: typing.Callable, truncate_before: Optional[int]):
-    if True:
+    if test_llm_availability():
         curr_conv = conv.get_current_conversation_as_dicts()
         if truncate_before != None:
             curr_conv = curr_conv[:truncate_before]
-        test_model = "llama2:13b"
-        completion = llm.chat.completions.create(
-            model=test_model,
-            messages=curr_conv
-        )
+        completion = ask(curr_conv)
         resp = completion.choices[0].message
     else:
-        resp = {'role': 'assistant', 'content': f'As an AI language model, simulated response {random.randint(0, 2**32)}'}
+        resp = {
+            'role': 'assistant',
+            'content': f'As an AI language model, simulated response {random.randint(0, 2 ** 32)}'
+        }
 
     and_then(resp)
 
 
 def _get_title_for_conversation_thread(conv: ConversationTree, and_then: typing.Callable):
-    if openai_api_key:
+    if True:
         curr_conv = conv.get_current_conversation_as_dicts()
         if len(curr_conv) >= 3:
-            test_model = "gpt-3.5-turbo"
-            completion = openai.ChatCompletion.create(
-                model=test_model,
-                messages=[
-                    {'role': 'system', 'content': 'Provide a short title, less than 5 words whenever possible, summarizing a user-submitted conversation between a user and an AI model, provided in JSON form. Avoid using the user\'s query verbatim in your title. Respond to user queries with the title you are providing, without other prefixes or suffixes.'},
-                    {'role': 'user', 'content': str(curr_conv)}
-                ]
-            )
-            resp = completion['choices'][0]['message']
+            messages = [
+                {'role': 'system', 'content': 'Provide a short title, less than 5 words whenever possible, summarizing '
+                                              'a user-submitted conversation between a user and an AI model, '
+                                              'provided in JSON form. Avoid using the user\'s query verbatim in your '
+                                              'title. Respond to user queries with the title you are providing, '
+                                              'without other prefixes or suffixes.'},
+                {'role': 'user', 'content': str(curr_conv)}
+            ]
+            completion = ask(messages)
+            resp = completion.choices[0].message
             and_then(resp)
 
 
@@ -169,7 +169,6 @@ class ChatClient(wx.Frame):
 
         self.bottom_button_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-
         setting_button = wx.Button(self.left_panel)
         setting_button.SetBitmap(set_icon("./assets/icon/cog.png"))
         setting_button.SetSize((40, 40))
@@ -185,7 +184,6 @@ class ChatClient(wx.Frame):
         self.bottom_button_sizer.Add(setting_button, flag=wx.EXPAND | wx.ALL, border=10)
         self.bottom_button_sizer.Add(github_button, flag=wx.EXPAND | wx.ALL, border=10)
         self.bottom_button_sizer.Add(self.new_conversation_button, flag=wx.EXPAND | wx.ALL, border=10)
-
 
         left_sizer.Add(block_sizer, flag=wx.EXPAND | wx.ALL, border=10)
         left_sizer.Add(self.left_list, proportion=1, flag=wx.EXPAND | wx.ALL, border=10)
@@ -223,7 +221,6 @@ class ChatClient(wx.Frame):
         self.send_button.Bind(wx.EVT_BUTTON, self.on_send_pressed)
         input_sizer.Add(self.input_text, 1, wx.EXPAND | wx.RIGHT | wx.LEFT | wx.BOTTOM, border=10)
         input_sizer.Add(self.send_button, 0, wx.EXPAND | wx.RIGHT | wx.LEFT | wx.BOTTOM, border=10)
-
 
         right_sizer.Add(self.right_text, proportion=1, flag=wx.EXPAND | wx.ALL, border=10)
         right_sizer.Add(wx.StaticLine(self.right_panel), flag=wx.EXPAND | wx.RIGHT | wx.LEFT, border=10)
@@ -328,7 +325,8 @@ class ChatClient(wx.Frame):
             self.refresh_conversation_detail()
             return True
         else:
-            self.right_text.AppendText(f"\n\nrequested sibling level outside range (1 - {len(self.current_conversation.get_current_conversation())})")
+            self.right_text.AppendText(
+                f"\n\nrequested sibling level outside range (1 - {len(self.current_conversation.get_current_conversation())})")
             return False
 
     def switch_branch(self, msg_idx, branch_idx):
@@ -351,37 +349,46 @@ class ChatClient(wx.Frame):
         if sibling_level >= 1 and sibling_level < len(self.current_conversation.get_current_conversation()):
             if self.role_at_level(sibling_level) == 'assistant':
                 self.start_thinking_state()
+
                 def post_completion(resp):
                     wx.CallAfter(self.add_to_branch, sibling_level, resp['role'], resp['content'])
                     wx.CallAfter(self.stop_thinking_state)
+
                 get_next_completion(self.current_conversation, post_completion, sibling_level)
             else:
                 if self.add_to_branch(sibling_level, 'user', content):
                     self.start_thinking_state()
+
                     def post_completion(resp):
                         wx.CallAfter(self.add_to_conversation, resp['role'], resp['content'])
                         wx.CallAfter(self.stop_thinking_state)
+
                     get_next_completion(self.current_conversation, post_completion)
         else:
-            self.right_text.AppendText(f"\n\nrequested sibling level for new-branch outside range (1 - {len(self.current_conversation.get_current_conversation())})")
+            self.right_text.AppendText(
+                f"\n\nrequested sibling level for new-branch outside range (1 - {len(self.current_conversation.get_current_conversation())})")
             return False
 
     def new_child(self, input_string):
         self.add_to_conversation("user", input_string)
         self.start_thinking_state()
+
         def post_completion(resp):
             wx.CallAfter(self.add_to_conversation, resp.role, resp.content)
             wx.CallAfter(self.stop_thinking_state)
+
         get_next_completion(self.current_conversation, post_completion)
 
     def get_title_for_conversation(self, idx):
         def post_completion(resp):
-            self.conversations[idx][0] = resp['content']
+            self.conversations[idx][0] = resp.content
             self.refresh_conversation_list()
+
         get_title_for_conversation_thread(self.conversations[idx][1], post_completion)
 
     def unrecognized_command(self):
-        self.right_text.AppendText(f"\n\nunrecognized / command, try one of these instead:\n/sw a b -- switches level a message to alternative b\n/nb n str -- creates a new response at level n (str ignored when replacing ChatGPT resps)")
+        self.right_text.AppendText(
+            f"\n\nunrecognized / command, try one of these instead:\n/sw a b -- switches level a message to alternative b\n/nb n str -- creates a new response at level n (str ignored when replacing ChatGPT resps)")
 
     def parse_command(self, input_string):
         if input_string.startswith('/sw'):
@@ -404,7 +411,8 @@ class ChatClient(wx.Frame):
                 if self.role_at_level(a) == 'assistant':
                     self.new_branch(a, None)
                 else:
-                    self.right_text.AppendText(f"\n\nnew-branch for level {a} also requires a prompt (e.g. /nb {a} Hello, world!)")
+                    self.right_text.AppendText(
+                        f"\n\nnew-branch for level {a} also requires a prompt (e.g. /nb {a} Hello, world!)")
             else:
                 self.unrecognized_command()
                 return
@@ -418,20 +426,8 @@ class ChatClient(wx.Frame):
     def on_github_button_click(self, e):
         webbrowser.open_new("https://www.baidu.com")
 
+
 if __name__ == '__main__':
     app = wx.App()
     ChatClient(None, title='Wise Whisper')
     app.MainLoop()
-
-
-
-
-
-
-
-
-
-
-
-
-
