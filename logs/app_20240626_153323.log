@@ -1,3 +1,0 @@
-2024-06-26 15:33:23.879 | INFO     | schema.schema:load_conversations:120 - Current content: 2
-2024-06-26 15:33:26.148 | INFO     | __main__:on_conversation_list_selected:241 - Selected conversation: 3
-2024-06-26 15:33:35.101 | INFO     | schema.schema:save_conversations:102 - Conversations saved to file.

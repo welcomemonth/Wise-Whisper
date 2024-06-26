@@ -1,4 +1,4 @@
-.logs/
+logs/
 .tmp/
 .vscode/
 node_modules/

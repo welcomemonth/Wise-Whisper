@@ -1,4 +1,0 @@
-2024-06-26 18:22:16.017 | INFO     | schema.schema:load_conversations:143 - Current content: 3
-2024-06-26 18:22:16.022 | INFO     | __main__:load:174 - current_conv_idx: 3
-2024-06-26 18:22:20.809 | DEBUG    | whisper.llm_provider.base_llm:_ask:70 - [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': 'hello, I want to do something'}, {'role': 'user', 'content': '你好'}, {'role': 'user', 'content': '你好'}, {'role': 'assistant', 'content': ''}, {'role': 'user', 'content': '你好'}, {'role': 'user', 'content': '你好'}, {'role': 'user', 'content': '你好'}]
-2024-06-26 18:23:17.675 | ERROR    | schema.schema:save_conversations:128 - An error occurred while saving conversations: 'gbk' codec can't encode character '\u200b' in position 1553: illegal multibyte sequence

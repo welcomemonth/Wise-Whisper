@@ -1,4 +1,0 @@
-2024-06-26 18:29:02.858 | INFO     | schema.schema:load_conversations:143 - Current content: 1
-2024-06-26 18:29:02.862 | INFO     | __main__:load:174 - current_conv_idx: 1
-2024-06-26 18:29:10.561 | DEBUG    | whisper.llm_provider.base_llm:_ask:70 - [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': '你好'}, {'role': 'assistant', 'content': '您好！有什么可以帮您的？'}, {'role': 'user', 'content': '讲一个笑话'}, {'role': 'assistant', 'content': '当然可以！我准备好了一个笑话，希望能让您开个小心！为什么橘子和苹果不能恋爱呢？\n\n因为他们太有果实了！\n\n希望这一个简单的笑话能够给您带来一丝欢乐和愉悦！'}, {'role': 'user', 'content': '你好呀'}]
-2024-06-26 18:29:23.635 | INFO     | schema.schema:save_conversations:124 - Conversations saved to file.

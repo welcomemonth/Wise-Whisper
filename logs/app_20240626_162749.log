@@ -1,3 +1,0 @@
-2024-06-26 16:27:50.686 | INFO     | schema.schema:load_conversations:143 - Current content: 1
-2024-06-26 16:27:50.690 | INFO     | __main__:load:174 - current_conv_idx: 1
-2024-06-26 16:27:53.470 | INFO     | schema.schema:save_conversations:124 - Conversations saved to file.

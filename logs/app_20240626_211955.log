@@ -1,4 +1,0 @@
-2024-06-26 21:19:56.380 | INFO     | __main__:load:174 - current_conv_idx: 0
-2024-06-26 21:20:01.549 | DEBUG    | whisper.llm_provider.base_llm:_ask:70 - [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': '你好'}]
-2024-06-26 21:21:08.612 | DEBUG    | whisper.llm_provider.base_llm:_ask:70 - [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': '你好'}, {'role': 'assistant', 'content': '您好！有什么需要帮助您的吗？'}, {'role': 'user', 'content': '讲个故事'}]
-2024-06-26 21:25:28.328 | INFO     | schema.schema:save_conversations:126 - Conversations saved to file.
