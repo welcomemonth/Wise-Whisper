@@ -1,0 +1,6 @@
+2024-06-26 16:16:58.053 | INFO     | schema.schema:load_conversations:121 - Current content: 3
+2024-06-26 16:16:58.054 | INFO     | __main__:load:174 - current_conv_idx: 3
+2024-06-26 16:17:06.003 | DEBUG    | whisper.llm_provider.base_llm:_ask:70 - [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': '你好'}]
+2024-06-26 16:17:13.348 | INFO     | whisper.llm_provider.base_llm:get_choice_text:95 - ChatCompletion(id='chatcmpl-219', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='您好！有什么可以帮助您的吗？', role='assistant', function_call=None, tool_calls=None))], created=1719389833, model='llama3-chinese-8b-instruct:latest', object='chat.completion', service_tier=None, system_fingerprint='fp_ollama', usage=CompletionUsage(completion_tokens=10, prompt_tokens=25, total_tokens=35))
+2024-06-26 16:17:13.349 | INFO     | __main__:handle_response:290 - response: 您好！有什么可以帮助您的吗？
+2024-06-26 16:26:36.653 | INFO     | schema.schema:save_conversations:102 - Conversations saved to file.

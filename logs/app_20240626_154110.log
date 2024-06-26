@@ -1,0 +1,7 @@
+2024-06-26 15:41:11.005 | INFO     | schema.schema:load_conversations:121 - Current content: 2
+2024-06-26 15:41:11.006 | INFO     | __main__:load:174 - current_conv_idx: 2
+2024-06-26 15:41:12.156 | INFO     | __main__:on_conversation_list_selected:243 - Selected conversation: 0
+2024-06-26 15:41:12.157 | INFO     | __main__:on_conversation_list_selected:248 - self.current_conversation_idx= : 4
+2024-06-26 15:41:12.845 | INFO     | __main__:on_conversation_list_selected:243 - Selected conversation: 1
+2024-06-26 15:41:12.845 | INFO     | __main__:on_conversation_list_selected:248 - self.current_conversation_idx= : 3
+2024-06-26 15:41:14.757 | INFO     | schema.schema:save_conversations:102 - Conversations saved to file.

@@ -1,0 +1,19 @@
+2024-06-26 16:27:02.157 | INFO     | schema.schema:load_conversations:143 - Current content: 3
+2024-06-26 16:27:02.158 | INFO     | __main__:load:174 - current_conv_idx: 3
+2024-06-26 16:27:06.612 | INFO     | __main__:on_conversation_list_selected:243 - Selected conversation: 0
+2024-06-26 16:27:06.613 | INFO     | __main__:on_conversation_list_selected:248 - self.current_conversation_idx= : 4
+2024-06-26 16:27:08.500 | INFO     | __main__:on_conversation_list_selected:243 - Selected conversation: 1
+2024-06-26 16:27:08.501 | INFO     | __main__:on_conversation_list_selected:248 - self.current_conversation_idx= : 3
+2024-06-26 16:27:08.995 | INFO     | __main__:on_conversation_list_selected:243 - Selected conversation: 2
+2024-06-26 16:27:08.996 | INFO     | __main__:on_conversation_list_selected:248 - self.current_conversation_idx= : 2
+2024-06-26 16:27:10.444 | INFO     | __main__:on_conversation_list_selected:243 - Selected conversation: 3
+2024-06-26 16:27:10.445 | INFO     | __main__:on_conversation_list_selected:248 - self.current_conversation_idx= : 1
+2024-06-26 16:27:11.203 | INFO     | __main__:on_conversation_list_selected:243 - Selected conversation: 2
+2024-06-26 16:27:11.204 | INFO     | __main__:on_conversation_list_selected:248 - self.current_conversation_idx= : 2
+2024-06-26 16:27:11.779 | INFO     | __main__:on_conversation_list_selected:243 - Selected conversation: 1
+2024-06-26 16:27:11.780 | INFO     | __main__:on_conversation_list_selected:248 - self.current_conversation_idx= : 3
+2024-06-26 16:27:12.348 | INFO     | __main__:on_conversation_list_selected:243 - Selected conversation: 0
+2024-06-26 16:27:12.349 | INFO     | __main__:on_conversation_list_selected:248 - self.current_conversation_idx= : 4
+2024-06-26 16:27:17.212 | INFO     | __main__:on_conversation_list_selected:243 - Selected conversation: 1
+2024-06-26 16:27:17.213 | INFO     | __main__:on_conversation_list_selected:248 - self.current_conversation_idx= : 3
+2024-06-26 16:27:19.773 | INFO     | schema.schema:save_conversations:124 - Conversations saved to file.

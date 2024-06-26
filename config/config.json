@@ -1,0 +1,7 @@
+{
+  "llm": "ollama",
+  "api_key": "your_api_key",
+  "base_url": "https://macaw-pleasing-jawfish.ngrok-free.app/v1",
+  "secret_key": "your_secret_key",
+  "model": "llama3-chinese-8b-instruct:latest"
+}

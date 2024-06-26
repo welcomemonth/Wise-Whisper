@@ -8,9 +8,8 @@
 """
 import wx
 import threading
-import time
 from openai import OpenAI
-from llm_provider.llm_openai import llm
+from whisper.llm_provider.llm_openai import llm
 
 
 # 假设 OpenAI API 的使用方式和返回结果

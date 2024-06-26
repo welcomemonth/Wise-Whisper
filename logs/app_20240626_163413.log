@@ -1,0 +1,25 @@
+2024-06-26 16:34:14.323 | INFO     | __main__:load:174 - current_conv_idx: 0
+2024-06-26 16:34:22.940 | INFO     | __main__:on_conversation_list_selected:245 - Selected conversation: 1
+2024-06-26 16:34:22.941 | INFO     | __main__:on_conversation_list_selected:250 - self.current_conversation_idx= : 1
+2024-06-26 16:34:24.164 | INFO     | __main__:on_conversation_list_selected:245 - Selected conversation: 0
+2024-06-26 16:34:24.165 | INFO     | __main__:on_conversation_list_selected:250 - self.current_conversation_idx= : 2
+2024-06-26 16:34:24.740 | INFO     | __main__:on_conversation_list_selected:245 - Selected conversation: 1
+2024-06-26 16:34:24.741 | INFO     | __main__:on_conversation_list_selected:250 - self.current_conversation_idx= : 1
+2024-06-26 16:34:25.116 | INFO     | __main__:on_conversation_list_selected:245 - Selected conversation: 0
+2024-06-26 16:34:25.116 | INFO     | __main__:on_conversation_list_selected:250 - self.current_conversation_idx= : 2
+2024-06-26 16:34:32.412 | INFO     | __main__:on_conversation_list_selected:245 - Selected conversation: 1
+2024-06-26 16:34:32.412 | INFO     | __main__:on_conversation_list_selected:250 - self.current_conversation_idx= : 1
+2024-06-26 16:34:35.932 | INFO     | __main__:on_conversation_list_selected:245 - Selected conversation: 0
+2024-06-26 16:34:35.932 | INFO     | __main__:on_conversation_list_selected:250 - self.current_conversation_idx= : 2
+2024-06-26 16:34:37.924 | INFO     | __main__:on_conversation_list_selected:245 - Selected conversation: 1
+2024-06-26 16:34:37.925 | INFO     | __main__:on_conversation_list_selected:250 - self.current_conversation_idx= : 1
+2024-06-26 16:34:44.060 | INFO     | __main__:on_conversation_list_selected:245 - Selected conversation: 1
+2024-06-26 16:34:44.061 | INFO     | __main__:on_conversation_list_selected:250 - self.current_conversation_idx= : 2
+2024-06-26 16:34:44.852 | INFO     | __main__:on_conversation_list_selected:245 - Selected conversation: 2
+2024-06-26 16:34:44.853 | INFO     | __main__:on_conversation_list_selected:250 - self.current_conversation_idx= : 1
+2024-06-26 16:34:45.852 | INFO     | __main__:on_conversation_list_selected:245 - Selected conversation: 0
+2024-06-26 16:34:45.853 | INFO     | __main__:on_conversation_list_selected:250 - self.current_conversation_idx= : 3
+2024-06-26 16:45:31.338 | DEBUG    | whisper.llm_provider.base_llm:_ask:70 - [{'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'system', 'content': 'You are a helpful assistant.'}, {'role': 'user', 'content': 'hello, I want to do something'}]
+2024-06-26 16:45:37.065 | INFO     | whisper.llm_provider.base_llm:get_choice_text:95 - ChatCompletion(id='chatcmpl-980', choices=[Choice(finish_reason='stop', index=0, logprobs=None, message=ChatCompletionMessage(content='Hello! What would you like to do?', role='assistant', function_call=None, tool_calls=None))], created=1719391536, model='llama3-chinese-8b-instruct:latest', object='chat.completion', service_tier=None, system_fingerprint='fp_ollama', usage=CompletionUsage(completion_tokens=10, prompt_tokens=47, total_tokens=57))
+2024-06-26 16:45:37.065 | INFO     | __main__:handle_response:292 - response: Hello! What would you like to do?
+2024-06-26 17:44:53.692 | INFO     | schema.schema:save_conversations:124 - Conversations saved to file.

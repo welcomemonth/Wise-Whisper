@@ -1,0 +1,4 @@
+2024-06-26 15:39:06.258 | INFO     | schema.schema:load_conversations:121 - Current content: 2
+2024-06-26 15:39:06.260 | INFO     | __main__:load:174 - current_conv_idx: 2
+2024-06-26 15:39:15.052 | INFO     | __main__:on_conversation_list_selected:242 - Selected conversation: 2
+2024-06-26 15:39:15.053 | INFO     | __main__:on_conversation_list_selected:247 - self.current_conversation_idx= : 2
