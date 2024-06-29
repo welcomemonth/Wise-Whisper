@@ -36,11 +36,21 @@ class BaseLLM(ABC):  # todo 创建一个抽象基类
     def _default_system_msg(self):
         return self._system_msg(self.system_prompt)
 
-    def ask(self, messages: list[dict[str, str]], and_then: typing.Callable, stream=False):
+    @property
+    @abstractmethod
+    def model_list(self):
+        """
+        该框架能够使用的模型列表
+        """
+
+    def ask(self, messages: list[dict[str, str]], and_then: typing.Callable, stream=False, model=None):
         """
             统一调用的接口回复问题的接口
         """
-        thread = threading.Thread(target=self._ask, args=(messages, and_then), kwargs={'stream': stream})
+        thread = threading.Thread(target=self._ask,
+                                  args=(messages, and_then),
+                                  kwargs={'stream': stream, 'model': model}
+                                  )
         thread.start()
 
     def _user_msg(self, msg: str, images: Optional[Union[str, list[str]]] = None) -> dict[str, Union[str, dict]]:
@@ -56,7 +66,8 @@ class BaseLLM(ABC):  # todo 创建一个抽象基类
         msg: Union[str, list[dict[str, str]]],
         and_then: typing.Callable,
         system_msgs: Optional[list[str]] = None,
-        stream = False
+        stream: bool = False,
+        model: str = None
     ):
         if system_msgs:
             messages = self._system_msgs(system_msgs)
@@ -67,27 +78,28 @@ class BaseLLM(ABC):  # todo 创建一个抽象基类
             messages.append(self._user_msg(msg))
         else:
             messages.extend(msg)
-        logger.debug(messages)
-        rsp = self.completion_text(messages, stream=stream)
+        logger.info(messages)
+        rsp = self.completion_text(messages, model=model, stream=stream)
+        logger.info(rsp)
         and_then(rsp)
 
     @abstractmethod
-    def chat_completion(self, messages: list[dict], timeout=3):
+    def chat_completion(self, messages: list[dict], model=None, timeout=3):
         """_achat_completion implemented by inherited class"""
 
     @abstractmethod
-    def chat_completion_stream(self, messages: list[dict], timeout=3):
+    def chat_completion_stream(self, messages: list[dict], model=None, timeout=3):
         """_achat_completion implemented by inherited class"""
 
     @abstractmethod
-    def completion(self, messages: list[dict], timeout=3):
+    def completion(self, messages: list[dict], model=None, timeout=3):
         """"""
 
-    def completion_text(self, messages: list[dict], stream: bool = False, timeout: int = 3) -> str:
+    def completion_text(self, messages: list[dict], stream: bool = False, model: str = None, timeout: int = 3) -> str:
         """Asynchronous version of completion. Return str. Support stream-print"""
         if stream:
-            return self.chat_completion_stream(messages, timeout=timeout)
-        resp = self.chat_completion(messages, timeout=timeout)
+            return self.chat_completion_stream(messages, model, timeout=timeout)
+        resp = self.chat_completion(messages, model, timeout=timeout)
         return self.get_choice_text(resp)
 
     def get_choice_text(self, rsp: openai.ChatCompletion) -> str:

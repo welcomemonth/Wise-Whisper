@@ -6,6 +6,7 @@
 @File: ollama_api
 @Desc zhengyu 2024/6/25 22:10. + cause
 """
+import requests
 from openai import OpenAI
 
 from whisper.llm_config import LLMConfig, CONFIG
@@ -29,26 +30,42 @@ class OllamaLLM(BaseLLM):
         self.model = config.model
         self.pricing_plan = self.model
 
-    def completion(self, messages: list[dict], timeout=3):
+    def completion(self, messages: list[dict], model=None, timeout=3):
         return self.client.chat.completions.create(
-            model=self.model,
+            model=model if model else self.model,
             messages=messages,
             stream=False,
         )
 
-    def chat_completion(self, messages: list[dict], timeout=3):
+    def chat_completion(self, messages: list[dict], model=None, timeout=3):
         return self.client.chat.completions.create(
-            model=self.model,
+            model=model if model else self.model,
             messages=messages,
             stream=False,
         )
 
-    def chat_completion_stream(self, messages: list[dict], timeout=3):
+    def chat_completion_stream(self, messages: list[dict], model=None, timeout=3):
         return self.client.chat.completions.create(
-            model=self.model,
+            model=model if model else self.model,
             messages=messages,
             stream=True,
         )
+
+    @property
+    def model_list(self) -> list[str]:
+        base_url = 'https://macaw-pleasing-jawfish.ngrok-free.app/api/tags'
+        # 发送 GET 请求以获取模型列表
+        response = requests.get(base_url)
+
+        # 检查请求是否成功
+        if response.status_code == 200:
+            # 解析响应的 JSON 数据
+            models = response.json()['models']
+            models_list = [model['name'] for model in models]
+            return models_list
+        else:
+            print(f"无法获取模型列表，HTTP 状态码：{response.status_code}")
+            return []
 
 
 def and_then(rsp):
@@ -60,6 +77,7 @@ def and_then(rsp):
 if __name__ == '__main__':
     ollama = OllamaLLM()
 
-    ollama.ask([{"role": "user", "content": "讲一个笑话"}], and_then)
+    # ollama.ask([{"role": "user", "content": "讲一个笑话"}], and_then)
+    print(ollama.model_list)
 
 

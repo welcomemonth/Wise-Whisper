@@ -58,6 +58,7 @@ class Message(BaseModel):
         ret += f"\n{'-' * 50}\n"
         return ret
 
+
 class SimpleMessage(BaseModel):
     content: str
     role: str
@@ -118,9 +119,9 @@ def save_conversations(cons: List[Conversation], current_idx: str):
 
     talk_json = json.dumps(talk_data, ensure_ascii=False, separators=(',', ':'))
     try:
-        with open(DATA_FILE_PATH, "w") as file:
+        with open(DATA_FILE_PATH, "w", encoding='utf-8') as file:
             file.write(talk_json)
-        with open(DATA_CURRENT_INDEX, "w") as file:
+        with open(DATA_CURRENT_INDEX, "w", encoding='utf-8') as file:
             file.write(str(current_idx))
 
         logger.info("Conversations saved to file.")
@@ -140,18 +141,23 @@ def load_conversations() -> Union[dict[str, Union[list[Any], int]], list[Convers
     if not os.path.exists(DATA_CURRENT_INDEX):  # todo 修改为全局变量
         current_index = 0
     else:
-        with open(DATA_CURRENT_INDEX, "r") as file:
+        with open(DATA_CURRENT_INDEX, "r", encoding='utf-8') as file:
             content = file.read()
             logger.info(f"Current content: {content}")
             # todo 判断文件中读到的是否是一个可转换为整数的字符串
             current_index = 0 if content == "" else int(content)
 
     # 从文件中读取 JSON 字符串并解析为对话框列表
-    loaded_conversations_data = []
-    with open(DATA_FILE_PATH, "r") as file:
+    with open(DATA_FILE_PATH, "r", encoding='utf-8') as file:
         loaded_conversations_json = file.read()
-        loaded_conversations_data = json.loads(loaded_conversations_json)
+        # logger.info(f"当前消息内容为: {loaded_conversations_json}")
 
+    # 可能出现文件为空的情况，这种情况json解析失败
+    try:
+        loaded_conversations_data = json.loads(loaded_conversations_json)
+    except Exception as e:
+        logger.debug(f"读取文件出现错误：{e}")
+        return {"conversations": [], "current_conv_idx": 0}
     # 根据加载的数据创建 Conversation 对象列表
     loaded_conversations = []
     for index, conv_data in enumerate(loaded_conversations_data):

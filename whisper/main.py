@@ -16,7 +16,7 @@
 
 import wx
 from typing import Optional
-import random
+import threading
 import sys
 import json
 import webbrowser
@@ -26,11 +26,9 @@ from llm_provider.ollama_api import OllamaLLM
 
 llm = OllamaLLM()
 
-# todo 初始化问题，初始化应该有一个默认的对话框
-# todo 按钮名称和功能修改
-# todo message 类型构建
 # todo 数据存储到当前目录下
-
+# todo UI设计在right_text中应该有多个消息框，这样不用刷新整个right_text
+# todo 自定义按钮
 
 def set_icon(img_path: str, width: int = 16, height: int = 16):
     setting_icon = wx.Bitmap(img_path, wx.BITMAP_TYPE_PNG)
@@ -56,7 +54,8 @@ class ChatClient(wx.Frame):
         self.send_button = None
 
         self.init_ui()
-        self.load()
+        self.load_message()
+        self.on_load_data()
 
         self.Bind(wx.EVT_CLOSE, self.on_close)
         self.SetSize((900, 600))
@@ -133,10 +132,10 @@ class ChatClient(wx.Frame):
             font.SetFamily(wx.FONTFAMILY_TELETYPE)
         self.right_text.SetFont(font)
 
-        # 在输入栏上方有一排按钮
-        self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)  # 在输入栏上方有一排按钮
+        self.model_list_cb = wx.ComboBox(self.right_panel, style=wx.CB_DROPDOWN)  # 一个模型选择框
         self.button_sizer.Add(wx.Button(self.right_panel, label="Copy"), flag=wx.ALL, border=10)
-        self.button_sizer.Add(wx.Button(self.right_panel, label="Paste"), flag=wx.ALL, border=10)
+        self.button_sizer.Add(self.model_list_cb, 1, flag=wx.ALL | wx.EXPAND, border=10)  # 1代表可扩展，即随着窗口变大而变大
         self.button_sizer.Add(wx.Button(self.right_panel, label="Clear"), flag=wx.ALL, border=10)
         self.button_sizer.Add(wx.Button(self.right_panel, label="Find"), flag=wx.ALL, border=10)
         self.button_sizer.Add(wx.Button(self.right_panel, label="Settings"), flag=wx.ALL, border=10)
@@ -145,6 +144,7 @@ class ChatClient(wx.Frame):
         input_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         self.input_text = wx.TextCtrl(self.right_panel, size=(-1, 60), style=wx.TE_MULTILINE | wx.TE_PROCESS_ENTER)
+        self.input_text.Bind(wx.EVT_TEXT_ENTER, self.on_enter_pressed)
         self.input_text.SetFont(font)
 
         self.send_button = wx.Button(self.right_panel, label="Send")
@@ -155,7 +155,7 @@ class ChatClient(wx.Frame):
         right_sizer.Add(self.right_text, proportion=1, flag=wx.EXPAND | wx.ALL, border=10)
         right_sizer.Add(wx.StaticLine(self.right_panel), flag=wx.EXPAND | wx.RIGHT | wx.LEFT, border=10)
         right_sizer.Add(self.button_sizer, flag=wx.EXPAND)
-        right_sizer.Add(input_sizer, flag=wx.EXPAND | wx.RIGHT | wx.LEFT | wx.BOTTOM, border=10)
+        right_sizer.Add(input_sizer, flag=wx.EXPAND | wx.RIGHT | wx.BOTTOM, border=10)
         self.right_panel.SetSizer(right_sizer)
 
     def on_close(self, event: wx.CloseEvent):
@@ -165,7 +165,7 @@ class ChatClient(wx.Frame):
     def save(self):
         save_conversations(self.conversations, str(self.current_conversation_idx))
 
-    def load(self):
+    def load_message(self):
         try:
             data = load_conversations()
             self.conversations = data["conversations"]
@@ -229,8 +229,6 @@ class ChatClient(wx.Frame):
             self.left_list.SetSelection(current_idx)
 
     def on_send_pressed(self, event):
-        if self.current_conversation == None:
-            self.on_new_conversation(None)
         self.parse_command(self.input_text.GetValue())
         self.input_text.Clear()
 
@@ -258,7 +256,11 @@ class ChatClient(wx.Frame):
             self.current_conversation.title = resp.content
             self.refresh_conversation_list()
 
-        llm.ask(self.current_conversation.msgs_to_list(), post_completion, stream=False)
+        llm.ask(self.current_conversation.msgs_to_list(),
+                post_completion,
+                stream=False,
+                model=self.model_list_cb.GetValue()
+                )
 
     def unrecognized_command(self):
         self.right_text.AppendText(
@@ -278,21 +280,32 @@ class ChatClient(wx.Frame):
             self.refresh_conversation_detail()
 
             self.start_thinking_state()
-            llm.ask(self.current_conversation.msgs_to_list(), self.handle_response, stream=True)
+            llm.ask(self.current_conversation.msgs_to_list(),
+                    and_then=self.handle_response,
+                    stream=True,
+                    model=self.model_list_cb.GetValue()
+                    )
             return
 
     def handle_response(self, resp):
         wx.CallAfter(self.update_content, resp)
         wx.CallAfter(self.stop_thinking_state)
 
-    def add_to_conversation(self, role, content):
-        msg = Message(content, role=role)
-        self.current_conversation.add_message(msg)
-        self.refresh_conversation_detail()
-        # if self.conversations[self.current_conversation_idx] == "New conversation" and role == "assistant":
-        #     self.conversations[self.current_conversation_idx].title = "Retrieving title..."
-        #     self.refresh_conversation_list()
-        #     self.get_title_for_conversation(self.current_conversation_idx - 1)
+    def on_load_data(self):
+        # 模拟耗时操作，实际应用中替换成实际的数据获取过程
+        def load_data():
+            return llm.model_list
+
+        # 在后台线程中获取数据
+        def background_task():
+            data = load_data()
+            wx.CallAfter(self.update_combo_box, data)
+
+        threading.Thread(target=background_task).start()
+
+    def update_combo_box(self, data):
+        self.model_list_cb.SetItems(data)
+        self.model_list_cb.SetSelection(0)
 
     def update_content(self, resp):
         current_msg = Message(role="assistant", content="")
