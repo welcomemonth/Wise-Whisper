@@ -21,6 +21,7 @@ import sys
 import json
 import webbrowser
 from logger import logger
+from whisper.subpage import SettingsDialog, SettingsPanel
 from schema.schema import Message, Conversation, load_conversations, save_conversations
 from llm_provider.ollama_api import OllamaLLM
 
@@ -29,6 +30,7 @@ llm = OllamaLLM()
 # todo 数据存储到当前目录下
 # todo UI设计在right_text中应该有多个消息框，这样不用刷新整个right_text
 # todo 自定义按钮
+ID_TIMER = 1
 
 def set_icon(img_path: str, width: int = 16, height: int = 16):
     setting_icon = wx.Bitmap(img_path, wx.BITMAP_TYPE_PNG)
@@ -53,6 +55,9 @@ class ChatClient(wx.Frame):
         self.input_text = None
         self.send_button = None
 
+        self.timer = wx.Timer(self, ID_TIMER)
+        self.blick = 0
+
         self.init_ui()
         self.load_message()
         self.on_load_data()
@@ -66,9 +71,15 @@ class ChatClient(wx.Frame):
         self.create_left_panel()
         self.create_right_panel()
 
+        self.statusbar = self.CreateStatusBar()  #
+        self.statusbar.SetStatusText('Welcome to Isabelle')
+        # 事件到时之后的操作绑定
+        self.Bind(wx.EVT_TIMER, self.on_timer, id=ID_TIMER)
+
         main_sizer = wx.BoxSizer(wx.HORIZONTAL)
         main_sizer.Add(self.left_panel, proportion=1, flag=wx.EXPAND | wx.ALL, border=10)
         main_sizer.Add(self.right_panel, proportion=3, flag=wx.EXPAND | wx.ALL, border=10)
+
         self.SetSizer(main_sizer)
 
     def create_left_panel(self):
@@ -100,7 +111,8 @@ class ChatClient(wx.Frame):
 
         setting_button = wx.Button(self.left_panel)
         setting_button.SetBitmap(set_icon("../assets/icon/cog.png"))
-        setting_button.SetSize((40, 40))
+        setting_button.Bind(wx.EVT_BUTTON, self.on_settings_button_click)
+        # setting_button.SetMinSize((40, 40))
 
         github_button = wx.Button(self.left_panel)
         github_button.SetBitmap(set_icon("../assets/icon/github.png"))
@@ -263,8 +275,13 @@ class ChatClient(wx.Frame):
                 )
 
     def unrecognized_command(self):
-        self.right_text.AppendText(
-            f"\n\nunrecognized / command, try one of these instead:\n/sw a b -- switches level a message to alternative b\n/nb n str -- creates a new response at level n (str ignored when replacing ChatGPT resps)")
+        """
+        不能够识别的命令，将底部状态栏变为红色
+        """
+        self.statusbar.SetBackgroundColour('RED')
+        self.statusbar.SetStatusText('Unknown Command')
+        self.statusbar.Refresh()
+        self.timer.Start(50)
 
     def parse_command(self, input_string):
         if input_string.startswith('/sw'):
@@ -287,6 +304,14 @@ class ChatClient(wx.Frame):
                     )
             return
 
+    def on_timer(self, event):
+        self.blick = self.blick + 1
+        if self.blick == 25:
+            self.statusbar.SetBackgroundColour('#E0E2EB')
+            self.statusbar.Refresh()
+            self.timer.Stop()
+            self.blick = 0
+
     def handle_response(self, resp):
         wx.CallAfter(self.update_content, resp)
         wx.CallAfter(self.stop_thinking_state)
@@ -306,6 +331,12 @@ class ChatClient(wx.Frame):
     def update_combo_box(self, data):
         self.model_list_cb.SetItems(data)
         self.model_list_cb.SetSelection(0)
+
+    """ ================按钮点击事件===================== """
+    def on_settings_button_click(self, event):
+        dlg = SettingsDialog(self)
+        dlg.ShowModal()
+        dlg.Destroy()
 
     def update_content(self, resp):
         current_msg = Message(role="assistant", content="")

@@ -23,7 +23,7 @@ if not os.path.exists(pathlib.Path(AppDirs.user_state_dir)):
 
 # 检查文件是否存在，如果不存在则创建并写入初始内容
 
-with open(pathlib.Path(AppDirs.user_state_dir) / "test.dat", 'w') as f:
+with open(pathlib.Path(AppDirs.user_state_dir) / "example.dat", 'w') as f:
     f.write("")
     # print(f"Created {config_file_path}")
 # print(dat)
