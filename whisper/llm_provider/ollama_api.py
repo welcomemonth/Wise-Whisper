@@ -8,7 +8,7 @@
 """
 import requests
 from openai import OpenAI
-
+from whisper.logger import logger
 from whisper.llm_config import LLMConfig, CONFIG
 from whisper.llm_provider.base_llm import BaseLLM
 
@@ -31,6 +31,7 @@ class OllamaLLM(BaseLLM):
         self.pricing_plan = self.model
 
     def completion(self, messages: list[dict], model=None, timeout=3):
+        logger.info(f"当前使用的模型是：{model}")
         return self.client.chat.completions.create(
             model=model if model else self.model,
             messages=messages,
@@ -38,6 +39,7 @@ class OllamaLLM(BaseLLM):
         )
 
     def chat_completion(self, messages: list[dict], model=None, timeout=3):
+        logger.info(f"当前使用的模型是：{model}")
         return self.client.chat.completions.create(
             model=model if model else self.model,
             messages=messages,
@@ -45,6 +47,7 @@ class OllamaLLM(BaseLLM):
         )
 
     def chat_completion_stream(self, messages: list[dict], model=None, timeout=3):
+        logger.info(f"当前使用的模型是：{model}")
         return self.client.chat.completions.create(
             model=model if model else self.model,
             messages=messages,

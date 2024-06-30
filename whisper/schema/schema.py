@@ -107,6 +107,8 @@ class Conversation(BaseModel):
             ret += message.formatted_content(i, total)
         return ret
 
+    def clear_message(self):
+        self.messages = []
 
 def save_conversations(cons: List[Conversation], current_idx: str):
     """

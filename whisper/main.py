@@ -146,9 +146,12 @@ class ChatClient(wx.Frame):
 
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)  # 在输入栏上方有一排按钮
         self.model_list_cb = wx.ComboBox(self.right_panel, style=wx.CB_DROPDOWN)  # 一个模型选择框
+
         self.button_sizer.Add(wx.Button(self.right_panel, label="Copy"), flag=wx.ALL, border=10)
         self.button_sizer.Add(self.model_list_cb, 1, flag=wx.ALL | wx.EXPAND, border=10)  # 1代表可扩展，即随着窗口变大而变大
-        self.button_sizer.Add(wx.Button(self.right_panel, label="Clear"), flag=wx.ALL, border=10)
+        self.clear_button = wx.Button(self.right_panel, label="Clear")
+        self.clear_button.Bind(wx.EVT_BUTTON, self.on_clear)
+        self.button_sizer.Add(self.clear_button, flag=wx.ALL, border=10)
         self.button_sizer.Add(wx.Button(self.right_panel, label="Find"), flag=wx.ALL, border=10)
         self.button_sizer.Add(wx.Button(self.right_panel, label="Settings"), flag=wx.ALL, border=10)
 
@@ -173,6 +176,12 @@ class ChatClient(wx.Frame):
     def on_close(self, event: wx.CloseEvent):
         self.save()
         event.Skip()
+
+    def on_clear(self, event):
+        self.current_conversation.clear_message()
+        system_msg = Message(role="system", content="you are a helpful assistant")
+        self.current_conversation.add_message(system_msg)
+        self.refresh_conversation_detail()
 
     def save(self):
         save_conversations(self.conversations, str(self.current_conversation_idx))

@@ -78,9 +78,8 @@ class BaseLLM(ABC):  # todo 创建一个抽象基类
             messages.append(self._user_msg(msg))
         else:
             messages.extend(msg)
-        logger.info(messages)
+        # logger.info(messages)
         rsp = self.completion_text(messages, model=model, stream=stream)
-        logger.info(rsp)
         and_then(rsp)
 
     @abstractmethod
