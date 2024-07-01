@@ -37,6 +37,7 @@ LOG_ROOT = PROJECT_ROOT / "logs"
 DATA_ROOT = pathlib.Path(AppDirs.user_data_dir)
 DATA_FILE_PATH = DATA_ROOT / "state.dat"
 DATA_CURRENT_INDEX = DATA_ROOT / "current_index.dat"
+ICON_PATH = PROJECT_ROOT / "assets"
 
 if __name__ == '__main__':
     print(get_root_path())
@@ -44,4 +45,5 @@ if __name__ == '__main__':
     print(LOG_ROOT)
     print(DATA_ROOT)
     print(DATA_FILE_PATH)
+    print(ICON_PATH)
 

@@ -15,28 +15,25 @@
 '''
 
 import wx
+import wx.lib.scrolledpanel as scrolled
 from typing import Optional
 import threading
 import sys
 import json
 import webbrowser
 from logger import logger
-from whisper.subpage import SettingsDialog, SettingsPanel
-from schema.schema import Message, Conversation, load_conversations, save_conversations
-from llm_provider.ollama_api import OllamaLLM
+from whisper.util import set_icon
+from whisper.subpage import SettingsDialog, MessagePanel
+from whisper.schema.schema import Message, Conversation, load_conversations, save_conversations
+from whisper.llm_provider.ollama_api import OllamaLLM
 
 llm = OllamaLLM()
 
 # todo 数据存储到当前目录下
 # todo UI设计在right_text中应该有多个消息框，这样不用刷新整个right_text
 # todo 自定义按钮
+# todo 7/1号 将消息列表重构
 ID_TIMER = 1
-
-def set_icon(img_path: str, width: int = 16, height: int = 16):
-    setting_icon = wx.Bitmap(img_path, wx.BITMAP_TYPE_PNG)
-    setting_icon = setting_icon.ConvertToImage()
-    icon = setting_icon.Scale(width, height, wx.IMAGE_QUALITY_HIGH)  # 调整图像大小为 32x32
-    return icon
 
 
 class ChatClient(wx.Frame):
@@ -50,8 +47,8 @@ class ChatClient(wx.Frame):
         self.left_panel = None
         self.left_list = None
         self.new_conversation_button = None
+        self.conversation_panel = None
         self.right_panel = None
-        self.right_text = None
         self.input_text = None
         self.send_button = None
 
@@ -110,12 +107,12 @@ class ChatClient(wx.Frame):
         self.bottom_button_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         setting_button = wx.Button(self.left_panel)
-        setting_button.SetBitmap(set_icon("../assets/icon/cog.png"))
+        setting_button.SetBitmap(set_icon("icon/cog.png"))
         setting_button.Bind(wx.EVT_BUTTON, self.on_settings_button_click)
         # setting_button.SetMinSize((40, 40))
 
         github_button = wx.Button(self.left_panel)
-        github_button.SetBitmap(set_icon("../assets/icon/github.png"))
+        github_button.SetBitmap(set_icon("icon/github.png"))
         # 给按钮绑定点击事件
         github_button.Bind(wx.EVT_BUTTON, self.on_github_button_click)
 
@@ -136,13 +133,15 @@ class ChatClient(wx.Frame):
         self.right_panel = wx.Panel(self)
         right_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.right_text = wx.TextCtrl(self.right_panel, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2,
-                                      value="Press 'New conversation' to create a new conversation.")
-        self.right_text.SetMinSize((300, 300))
         font = wx.Font(wx.FontInfo(12))
         if not font.SetFaceName("Courier New"):
             font.SetFamily(wx.FONTFAMILY_TELETYPE)
-        self.right_text.SetFont(font)
+
+        # 创建一个可滚动面板用于显示消息
+        self.conversation_panel = scrolled.ScrolledPanel(self.right_panel, style=wx.SIMPLE_BORDER)
+        self.conversation_panel.SetupScrolling()  # 设置滚动功能
+        self.conversation_sizer = wx.BoxSizer(wx.VERTICAL)  # 使用垂直BoxSizer管理消息
+        self.conversation_panel.SetSizer(self.conversation_sizer)
 
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)  # 在输入栏上方有一排按钮
         self.model_list_cb = wx.ComboBox(self.right_panel, style=wx.CB_DROPDOWN)  # 一个模型选择框
@@ -167,11 +166,27 @@ class ChatClient(wx.Frame):
         input_sizer.Add(self.input_text, 1, wx.EXPAND | wx.RIGHT | wx.LEFT | wx.BOTTOM, border=10)
         input_sizer.Add(self.send_button, 0, wx.EXPAND | wx.RIGHT | wx.LEFT | wx.BOTTOM, border=10)
 
-        right_sizer.Add(self.right_text, proportion=1, flag=wx.EXPAND | wx.ALL, border=10)
+        right_sizer.Add(self.conversation_panel, proportion=1, flag=wx.EXPAND | wx.ALL, border=10)
         right_sizer.Add(wx.StaticLine(self.right_panel), flag=wx.EXPAND | wx.RIGHT | wx.LEFT, border=10)
         right_sizer.Add(self.button_sizer, flag=wx.EXPAND)
         right_sizer.Add(input_sizer, flag=wx.EXPAND | wx.RIGHT | wx.BOTTOM, border=10)
         self.right_panel.SetSizer(right_sizer)
+
+    def add_message(self, message):
+        """
+        向对话面板中添加消息
+
+        :param message: 消息内容
+
+        """
+        # 创建消息面板
+        message_panel = MessagePanel(self.conversation_panel, message)
+        message_panel.SetMinSize((-1, 400))  # 这个地方应该时动态显示
+        # 将消息面板添加到消息Sizer中
+        self.conversation_sizer.Add(message_panel, flag=wx.EXPAND | wx.ALL, border=5)
+        self.conversation_sizer.Add(wx.StaticLine(self.conversation_panel), flag=wx.EXPAND | wx.ALL, border=5)
+        # 重新布局消息面板
+        self.conversation_panel.Layout()
 
     def on_close(self, event: wx.CloseEvent):
         self.save()
@@ -212,7 +227,8 @@ class ChatClient(wx.Frame):
             print("初始化！")
 
     def start_thinking_state(self):
-        self.right_text.AppendText("\nChatGPT is thinking...")
+        # self.right_text.AppendText("\nChatGPT is thinking...")
+        # 这个地方开始思考时候添加一个新的消息
         self.send_button.Disable()
         self.left_list.Disable()
         self.new_conversation_button.Disable()
@@ -269,8 +285,10 @@ class ChatClient(wx.Frame):
             logger.info(f"self.current_conversation_idx= : {self.current_conversation_idx}")
 
     def refresh_conversation_detail(self):
-        self.right_text.Clear()
-        self.right_text.AppendText(self.current_conversation.formatted_conversation())
+        # self.right_text.Clear()
+        # self.right_text.AppendText(self.current_conversation.formatted_conversation())
+        # 对当前对话框的消息进行遍历
+        [self.add_message(msg) for msg in self.current_conversation.messages]
 
     def get_title_for_conversation(self, idx):
         def post_completion(resp):
@@ -352,7 +370,7 @@ class ChatClient(wx.Frame):
         self.current_conversation.add_message(current_msg)
         for chunk in resp:  # todo 通过更新messages中的这个message来刷新内容
             current_msg.content += chunk.choices[0].delta.content
-            self.right_text.Clear()
+            # self.right_text.Clear()
             self.current_conversation.update_message(current_msg)
             self.refresh_conversation_detail()
 

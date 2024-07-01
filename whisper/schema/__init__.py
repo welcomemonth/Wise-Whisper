@@ -6,3 +6,4 @@
 @File: __init__
 @Desc zhengyu 2024/6/25 14:40. + cause
 """
+from whisper.schema.schema import Message

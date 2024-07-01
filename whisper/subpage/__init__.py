@@ -9,3 +9,4 @@
 
 from whisper.subpage.setting_dialog import SettingsDialog
 from whisper.subpage.setting_panel import SettingsPanel
+from whisper.subpage.message_panel import MessagePanel
