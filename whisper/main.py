@@ -33,6 +33,7 @@ llm = OllamaLLM()
 # todo UI设计在right_text中应该有多个消息框，这样不用刷新整个right_text
 # todo 自定义按钮
 # todo 7/1号 将消息列表重构
+# todo 7/2号 重构UI之后，AI问答无法使用
 ID_TIMER = 1
 
 
