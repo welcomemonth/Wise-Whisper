@@ -173,9 +173,9 @@ class ChatClient(wx.Frame):
         right_sizer.Add(input_sizer, flag=wx.EXPAND | wx.RIGHT | wx.BOTTOM, border=10)
         self.right_panel.SetSizer(right_sizer)
 
-    def add_message(self, message):
+    def add_message_panel(self, message: Message):
         """
-        向对话面板中添加消息
+        向对话面板和当前对话框的messages列表中添加消息
 
         :param message: 消息内容
 
@@ -195,8 +195,10 @@ class ChatClient(wx.Frame):
 
     def on_clear(self, event):
         self.current_conversation.clear_message()
+        # 删除self.conversation_sizer中的内容
         system_msg = Message(role="system", content="you are a helpful assistant")
         self.current_conversation.add_message(system_msg)
+
         self.refresh_conversation_detail()
 
     def save(self):
@@ -208,9 +210,12 @@ class ChatClient(wx.Frame):
             self.conversations = data["conversations"]
             # 0默认为没有选择或者不存在对话框，从1开始
             self.current_conversation_idx = data['current_conv_idx']
-            logger.info(f"current_conv_idx: {self.current_conversation_idx}")
+            logger.info(f"从文件中读取的当前对话框索引为: {self.current_conversation_idx}")
             if len(self.conversations):
                 self.current_conversation = self.conversations[self.current_conversation_idx-1]
+                if not len(self.current_conversation.messages):  # 一条消息都没有，添加一个系统消息
+                    msg = Message(role="system", content="You are a helpful assistant.")
+                    self.current_conversation.add_message(msg)
             else:
                 # 不存在对话框的话，怎么显示 # todo 默认至少存在一个对话框
                 self.current_conversation_idx = 1
@@ -278,18 +283,20 @@ class ChatClient(wx.Frame):
 
     def on_conversation_list_selected(self, event):
         selection = self.left_list.GetSelection()
-        logger.info(f"Selected conversation: {selection}")
         if selection != wx.NOT_FOUND:
             self.current_conversation_idx = len(self.conversations) - selection
             self.current_conversation = self.conversations[self.current_conversation_idx - 1]
             self.refresh_conversation_detail()
-            logger.info(f"self.current_conversation_idx= : {self.current_conversation_idx}")
+            logger.info(f"当前选择窗口为= : {self.current_conversation_idx}")
 
     def refresh_conversation_detail(self):
-        # self.right_text.Clear()
-        # self.right_text.AppendText(self.current_conversation.formatted_conversation())
-        # 对当前对话框的消息进行遍历
-        [self.add_message(msg) for msg in self.current_conversation.messages]
+        """
+            刷新面板，每次先删除再添加
+        """
+        for item in self.conversation_sizer.GetChildren():
+            item.GetWindow().Destroy()
+        [self.add_message_panel(msg) for msg in self.current_conversation.messages]
+        self.conversation_sizer.Layout()
 
     def get_title_for_conversation(self, idx):
         def post_completion(resp):
